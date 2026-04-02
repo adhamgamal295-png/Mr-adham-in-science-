@@ -1,0 +1,106 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: students
+    // Document ID: {studentId}
+    // Fields:
+    //   - id: string (required)
+    //   - name: string (required)
+    //   - class: string (required)
+    //
+    // Collection: exams
+    // Document ID: {examId}
+    // Fields:
+    //   - id: string (required)
+    //   - exam_name: string (required)
+    //   - total_marks: number (required)
+    //
+    // Collection: grades
+    // Document ID: {gradeId}
+    // Fields:
+    //   - student_id: string (required)
+    //   - exam_id: string (required)
+    //   - knowledge: number (required)
+    //   - experiment: number (required)
+    //   - thinking: number (required)
+    //   - analysis: number (required)
+    //   - total: number (required)
+    //   - level: string (required)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == 'adhamgamal295@gmail.com';
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // Domain Validators
+    function isValidStudent(data) {
+      return hasRequiredFields(['name', 'class']) &&
+             hasOnlyAllowedFields(['name', 'class']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.class is string && data.class.size() > 0 && data.class.size() < 50;
+    }
+
+    function isValidExam(data) {
+      return hasRequiredFields(['exam_name', 'grade_level', 'total_marks']) &&
+             hasOnlyAllowedFields(['exam_name', 'grade_level', 'total_marks']) &&
+             data.exam_name is string && data.exam_name.size() > 0 && data.exam_name.size() < 100 &&
+             data.grade_level is number && data.grade_level >= 4 && data.grade_level <= 9 &&
+             data.total_marks is number && data.total_marks > 0;
+    }
+
+    function isValidGrade(data) {
+      return hasRequiredFields(['student_id', 'exam_id', 'knowledge', 'experiment', 'thinking', 'analysis', 'skill4', 'skill5', 'skill6', 'skill7', 'skill8', 'skill9', 'total', 'level']) &&
+             hasOnlyAllowedFields(['student_id', 'exam_id', 'knowledge', 'experiment', 'thinking', 'analysis', 'skill4', 'skill5', 'skill6', 'skill7', 'skill8', 'skill9', 'total', 'level']) &&
+             data.knowledge is number && data.knowledge >= 0 &&
+             data.experiment is number && data.experiment >= 0 &&
+             data.thinking is number && data.thinking >= 0 &&
+             data.analysis is number && data.analysis >= 0 &&
+             data.skill4 is number && data.skill4 >= 0 &&
+             data.skill5 is number && data.skill5 >= 0 &&
+             data.skill6 is number && data.skill6 >= 0 &&
+             data.skill7 is number && data.skill7 >= 0 &&
+             data.skill8 is number && data.skill8 >= 0 &&
+             data.skill9 is number && data.skill9 >= 0 &&
+             data.total is number && data.total >= 0 &&
+             data.level is string && data.level.size() > 0;
+    }
+
+    match /students/{studentId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin() && isValidStudent(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /exams/{examId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin() && isValidExam(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /grades/{gradeId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin() && isValidGrade(request.resource.data);
+      allow delete: if isAdmin();
+    }
+  }
+}

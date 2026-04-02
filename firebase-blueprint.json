@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "A student in the science class.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "class": { "type": "string" }
+      },
+      "required": ["id", "name", "class"]
+    },
+    "Exam": {
+      "title": "Exam",
+      "description": "A science exam.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "exam_name": { "type": "string" },
+        "total_marks": { "type": "number" }
+      },
+      "required": ["id", "exam_name", "total_marks"]
+    },
+    "Grade": {
+      "title": "Grade",
+      "description": "A student's grade in an exam.",
+      "type": "object",
+      "properties": {
+        "student_id": { "type": "string" },
+        "exam_id": { "type": "string" },
+        "knowledge": { "type": "number" },
+        "experiment": { "type": "number" },
+        "thinking": { "type": "number" },
+        "analysis": { "type": "number" },
+        "total": { "type": "number" },
+        "level": { "type": "string" }
+      },
+      "required": ["student_id", "exam_id", "knowledge", "experiment", "thinking", "analysis", "total", "level"]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Students collection"
+    },
+    "/exams/{examId}": {
+      "schema": "Exam",
+      "description": "Exams collection"
+    },
+    "/grades/{gradeId}": {
+      "schema": "Grade",
+      "description": "Grades collection"
+    }
+  }
+}
